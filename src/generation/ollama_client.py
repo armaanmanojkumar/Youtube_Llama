@@ -13,9 +13,16 @@ def chat(
     with httpx.Client(timeout=120.0) as client:
         response = client.post(
             f"{host}/api/chat",
-            json={"model": model, "messages": messages, "stream": False, "options": {"temperature": temperature}},
+            json={
+                "model": model,
+                "messages": messages,
+                "stream": False,
+                "think": False,
+                "options": {"temperature": temperature},
+            },
         )
-        response.raise_for_status()
+        if not response.is_success:
+            raise RuntimeError(f"Ollama chat error {response.status_code}: {response.text}")
         return response.json()["message"]["content"]
 
 

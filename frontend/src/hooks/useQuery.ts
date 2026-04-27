@@ -6,11 +6,11 @@ export function useQuery() {
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
 
-  async function query(q: string, top_k = 4) {
+  async function query(q: string, model?: string, top_k?: number) {
     setLoading(true)
     setError(null)
     try {
-      const data = await queryVideos(q, top_k)
+      const data = await queryVideos(q, model, top_k)
       setResult(data)
       return data
     } catch (e: any) {

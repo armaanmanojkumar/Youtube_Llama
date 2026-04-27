@@ -13,4 +13,6 @@ def extract_video_id(url: str) -> str:
 
 
 def fetch_transcript(video_id: str) -> List[dict]:
-    return YouTubeTranscriptApi.get_transcript(video_id)
+    api = YouTubeTranscriptApi()
+    fetched = api.fetch(video_id)
+    return [{"text": s.text, "start": s.start, "duration": s.duration} for s in fetched]
