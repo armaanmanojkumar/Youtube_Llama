@@ -1,7 +1,5 @@
 from typing import List
 
-from openai import OpenAI
-
 
 def build_context(chunks: List[dict]) -> str:
     parts = []
@@ -14,17 +12,9 @@ def build_context(chunks: List[dict]) -> str:
     return "\n\n---\n\n".join(parts)
 
 
-def generate_answer(
-    query: str,
-    context_chunks: List[dict],
-    api_key: str,
-    base_url: str,
-    model: str,
-) -> str:
-    client = OpenAI(api_key=api_key, base_url=base_url)
-    context = build_context(context_chunks)
-
-    messages = [
+def build_prompt(query: str, chunks: List[dict]) -> list:
+    context = build_context(chunks)
+    return [
         {
             "role": "system",
             "content": (
@@ -38,6 +28,3 @@ def generate_answer(
             "content": f"Context:\n\n{context}\n\nQuestion: {query}",
         },
     ]
-
-    response = client.chat.completions.create(model=model, messages=messages)
-    return response.choices[0].message.content
