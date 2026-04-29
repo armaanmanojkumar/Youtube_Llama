@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube LLaMA Studio</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Local AI · Instant video search</p>
+          <h1>YouTube LLaMA Studio</h1>
+          <p class="hero-text">
+            Search transcripts, summarize videos, and explore timestamps with a sleek animated interface — powered entirely by your local Ollama model.
+          </p>
+        </div>
+      </header>
+
+      <main>
+        <section class="panel grid-two">
+          <div class="card glass">
+            <h2>Ingest a YouTube video</h2>
+            <p>Paste a YouTube URL and build a private searchable knowledge base of the transcript.</p>
+            <input id="videoUrl" type="url" placeholder="https://www.youtube.com/watch?v=..." />
+            <button id="ingestButton" class="primary">Index video</button>
+            <div id="ingestStatus" class="status"></div>
+          </div>
+
+          <div class="card glass">
+            <h2>Ask anything</h2>
+            <p>Query the indexed videos, request summaries, or find exact timestamps.</p>
+            <textarea id="queryText" rows="4" placeholder="Ask a question about the indexed video..." spellcheck="false"></textarea>
+            <div class="row">
+              <select id="modelSelect"></select>
+              <input id="topK" type="number" min="1" max="12" value="4" />
+            </div>
+            <div class="row spaced">
+              <button id="queryButton" class="primary">Send query</button>
+              <button id="refreshVideos" class="secondary">Refresh library</button>
+            </div>
+            <div id="queryStatus" class="status"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="card glass stretch" id="responseCard">
+            <h2>Answer</h2>
+            <div id="answer" class="answer empty">Submit a question to see the AI answer here.</div>
+            <div id="sources" class="sources"></div>
+          </div>
+        </section>
+
+        <section class="panel grid-three" id="libraryPanel">
+          <div class="card glass small-card" id="videoLibrary">
+            <h2>Indexed Videos</h2>
+            <div id="videosList" class="videos-list"></div>
+          </div>
+
+          <div class="card glass small-card" id="statsCard">
+            <h2>System Stats</h2>
+            <div class="stats-grid">
+              <div><strong id="videoCount">0</strong><span>Videos</span></div>
+              <div><strong id="chunkCount">0</strong><span>Chunks</span></div>
+              <div><strong id="responseAvg">0.0s</strong><span>Average latency</span></div>
+            </div>
+          </div>
+
+          <div class="card glass small-card" id="performanceCard">
+            <h2>Recent queries</h2>
+            <ul id="recentQueries" class="recent-queries"></ul>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
