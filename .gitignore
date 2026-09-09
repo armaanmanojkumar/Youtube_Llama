@@ -15,6 +15,8 @@ build/
 # Data (on-disk stores, gitignored per README)
 data/chroma/
 data/transcripts/
+data/vectors/
+data/performance.json
 
 # Node
 node_modules/
@@ -24,6 +26,9 @@ frontend/.vite/
 # IDE
 .vscode/
 .idea/
+.claude/settings.local.json
+.venv*/
+.chroma-test*/
 
 # OS
 .DS_Store

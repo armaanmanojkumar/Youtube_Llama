@@ -21,7 +21,10 @@ class Settings:
     chunk_size: int = int(os.getenv("CHUNK_SIZE", "400"))
     chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "50"))
     top_k: int = int(os.getenv("TOP_K", "4"))
-    chroma_persist_dir: str = os.getenv("CHROMA_PERSIST_DIR", "./data/chroma")
+    vector_store_dir: str = os.getenv(
+        "VECTOR_STORE_DIR",
+        os.getenv("CHROMA_PERSIST_DIR", "./data/vectors"),
+    )
     temperature: float = float(os.getenv("TEMPERATURE", "0.2"))
 
     # Dynamic — re-read from .env on every access

@@ -6,7 +6,7 @@ Query any YouTube video using natural language, powered entirely by local LLMs v
 
 ## What it does
 
-Paste a YouTube URL → the transcript is fetched, chunked, and embedded into a local vector database (ChromaDB). Ask any question about the video and get a cited, context-grounded answer from your chosen local model.
+Paste a YouTube URL → the transcript is fetched, chunked, and embedded into a local SQLite vector store. Ask any question about the video and get a cited, context-grounded answer from your chosen local model.
 
 ---
 
@@ -14,9 +14,9 @@ Paste a YouTube URL → the transcript is fetched, chunked, and embedded into a 
 
 | Layer | Technology |
 |---|---|
-| LLM inference | Ollama (`gemma3:e4b`, `llama3.1:latest`) |
+| LLM inference | Ollama (`gemma3:4b`, `llama3.1:latest`) |
 | Embeddings | Ollama (`nomic-embed-text`) |
-| Vector database | ChromaDB (persistent, on-disk) |
+| Vector store | SQLite + exact cosine search (persistent, on-disk) |
 | Backend | FastAPI (Python 3.11+) |
 | Frontend | React + Vite + TypeScript |
 | Transcript fetch | `youtube-transcript-api` + `yt-dlp` |
@@ -33,7 +33,7 @@ youtube-rag/
 │   │   ├── chunker.py             # Sliding window chunking with overlap
 │   │   └── embedder.py            # Calls Ollama /api/embeddings
 │   ├── retrieval/
-│   │   ├── vector_store.py        # ChromaDB CRUD and collections
+│   │   ├── vector_store.py        # SQLite persistence and cosine search
 │   │   └── retriever.py           # Cosine similarity, top-k, MMR
 │   ├── generation/
 │   │   ├── prompt_builder.py      # Context injection and system prompt
@@ -52,7 +52,7 @@ youtube-rag/
 │   ├── index.html
 │   └── vite.config.ts
 ├── data/
-│   ├── chroma/                    # Vector DB on disk (gitignored)
+│   ├── vectors/                   # Vector store on disk (gitignored)
 │   └── transcripts/               # Raw JSON per video (gitignored)
 ├── tests/
 │   ├── test_ingestion.py
@@ -75,18 +75,12 @@ youtube-rag/
 Pull the required models before starting:
 
 ```bash
-ollama pull gemma3:e4b
+ollama pull gemma3:4b
 ollama pull llama3.1:latest
 ollama pull nomic-embed-text
 ```
 
-Enable CORS so the browser can talk to Ollama directly (required for the frontend):
-
-```bash
-OLLAMA_ORIGINS="*" ollama serve
-```
-
-To set this permanently, add `export OLLAMA_ORIGINS="*"` to your shell profile (`~/.zshrc` or `~/.bashrc`).
+The frontend talks to Ollama through the backend, so Ollama can keep its default CORS settings.
 
 ---
 
@@ -104,7 +98,7 @@ Edit `.env` with your settings:
 
 ```env
 OLLAMA_HOST=http://localhost:11434
-MODEL=gemma3:e4b
+MODEL=llama3.1:latest
 EMBED_MODEL=nomic-embed-text
 CHUNK_SIZE=400
 CHUNK_OVERLAP=50
@@ -215,7 +209,7 @@ chunker.py               ← sliding window, configurable size + overlap
 embedder.py              ← calls Ollama nomic-embed-text per chunk
     │
     ▼
-vector_store.py          ← stores vectors + metadata in ChromaDB
+vector_store.py          ← stores vectors + metadata in SQLite
     │
     ▼  (at query time)
 retriever.py             ← cosine similarity, top-k + optional MMR
@@ -224,7 +218,7 @@ retriever.py             ← cosine similarity, top-k + optional MMR
 prompt_builder.py        ← injects retrieved chunks as context
     │
     ▼
-ollama_client.py         ← streams answer from gemma3:e4b or llama3.1
+ollama_client.py         ← streams answers from the configured Ollama model
 ```
 
 ---
@@ -235,11 +229,12 @@ All tunable via `.env` or passed directly to the API:
 
 | Parameter | Default | Description |
 |---|---|---|
-| `MODEL` | `gemma3:e4b` | Chat model used for generation |
+| `MODEL` | `llama3.1:latest` | Chat model used for generation |
 | `EMBED_MODEL` | `nomic-embed-text` | Embedding model for chunks and queries |
 | `CHUNK_SIZE` | `400` | Characters per chunk |
 | `CHUNK_OVERLAP` | `50` | Overlap between adjacent chunks |
 | `TOP_K` | `4` | Number of chunks retrieved per query |
+| `VECTOR_STORE_DIR` | `./data/vectors` | SQLite vector storage directory |
 | `temperature` | `0.2` | Generation temperature (lower = more factual) |
 
 For factual RAG queries, keep `temperature` between `0.1` and `0.3`. For exploratory or creative queries, raise it to `0.7`.
@@ -251,7 +246,7 @@ For factual RAG queries, keep `temperature` between `0.1` and `0.3`. For explora
 | Branch | Owner | Scope |
 |---|---|---|
 | `feat/ingestion` | Person 1 | `src/ingestion/`, `tests/test_ingestion.py` |
-| `feat/retrieval` | Person 2 | `src/retrieval/`, `data/chroma/`, `tests/test_retrieval.py` |
+| `feat/retrieval` | Person 2 | `src/retrieval/`, `data/vectors/`, `tests/test_retrieval.py` |
 | `feat/api` | Person 3 | `src/api/`, `src/generation/` |
 | `feat/frontend` | Person 4 | `frontend/` |
 

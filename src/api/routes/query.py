@@ -19,7 +19,7 @@ from src.retrieval.vector_store import VectorStore
 logger = logging.getLogger("rag.query")
 
 router = APIRouter()
-store = VectorStore(persist_dir=settings.chroma_persist_dir)
+store = VectorStore(persist_dir=settings.vector_store_dir)
 retriever = Retriever(store)
 
 PERF_FILE = Path("data/performance.json")
@@ -108,22 +108,12 @@ def query_videos(req: QueryRequest):
 
 @router.get("/videos")
 def list_videos():
-    return VectorStore(persist_dir=settings.chroma_persist_dir).get_indexed_videos()
+    return store.get_indexed_videos()
 
 
 @router.get("/stats")
 def stats():
-    s = VectorStore(persist_dir=settings.chroma_persist_dir)
-    videos = s.get_indexed_videos()
-    all_items = s.collection.get(include=["metadatas"])
-    total_chunks = len(all_items["ids"])
-    per_video = {}
-    for m in all_items["metadatas"]:
-        vid = m["video_id"]
-        if vid not in per_video:
-            per_video[vid] = {"video_id": vid, "video_url": m.get("video_url", ""), "chunks": 0}
-        per_video[vid]["chunks"] += 1
-    return {"total_videos": len(videos), "total_chunks": total_chunks, "videos": list(per_video.values())}
+    return store.get_stats()
 
 
 @router.get("/models")

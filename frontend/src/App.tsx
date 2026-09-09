@@ -28,7 +28,7 @@ export default function App() {
   const [perfLoading, setPerfLoading] = useState(false)
 
   const { ingest, loading: ingesting, error: ingestError } = useIngest()
-  const { query, loading: querying } = useQuery()
+  const { query, loading: querying, error: queryError } = useQuery()
   const { available } = useOllama()
 
   // Poll active model from .env every 3s so UI stays in sync
@@ -194,6 +194,7 @@ export default function App() {
                 {querying ? '…' : 'Ask'}
               </button>
             </div>
+            {queryError && <p style={{ color: '#c00', fontSize: '0.82rem', margin: '0.4rem 0 0' }}>{queryError}</p>}
           </section>
         </>
       )}

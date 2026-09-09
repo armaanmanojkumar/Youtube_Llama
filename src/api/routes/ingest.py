@@ -12,7 +12,7 @@ from src.retrieval.vector_store import VectorStore
 logger = logging.getLogger("rag.ingest")
 
 router = APIRouter()
-store = VectorStore(persist_dir=settings.chroma_persist_dir)
+store = VectorStore(persist_dir=settings.vector_store_dir)
 
 
 class IngestRequest(BaseModel):
@@ -47,7 +47,7 @@ def ingest_video(req: IngestRequest):
         )
         logger.info("Embeddings done")
 
-        logger.info("Storing in ChromaDB...")
+        logger.info("Storing vectors...")
         store.add_chunks(chunks, embeddings)
         logger.info(f"Done! {len(chunks)} chunks indexed for {video_id}")
 
